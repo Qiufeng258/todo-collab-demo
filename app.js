@@ -37,12 +37,17 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 // ================================================================
 function render() {
     // ---- 1. 更新统计卡片（熊健 开发） ----
+    // ---- 1. 更新统计卡片（熊健 开发，增加动态数字动画） ----
     const total = todos.length;
     const done = todos.filter(function(t) { return t.completed; }).length;
     const pending = total - done;
-    totalSpan.textContent = total;
-    doneSpan.textContent = done;
-    pendingSpan.textContent = pending;
+
+// ============================================================
+// 熊健 优化：统计数字增加动态变化动画
+// ============================================================
+    animateNumber(totalSpan, total);
+    animateNumber(doneSpan, done);
+    animateNumber(pendingSpan, pending);
 
     // ---- 2. 筛选数据（郭桂林 开发） ----
     var filteredTodos = todos;
@@ -187,7 +192,33 @@ loginBtn.addEventListener('click', handleLogin);
 pwdInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleLogin();
 });
+// ================================================================
+// 熊健 开发：统计卡片数字动态变化动画
+// ================================================================
+function animateNumber(element, targetValue) {
+    // 如果目标值没变，不触发动画
+    var currentValue = parseInt(element.textContent) || 0;
+    if (currentValue === targetValue) return;
 
+    var duration = 300;  // 动画持续时间（毫秒）
+    var startTime = null;
+
+    function updateNumber(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        // 缓动函数：先快后慢
+        var easedProgress = 1 - Math.pow(1 - progress, 3);
+        var current = Math.round(easedProgress * (targetValue - currentValue) + currentValue);
+        element.textContent = current;
+
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        } else {
+            element.textContent = targetValue;
+        }
+    }
+    requestAnimationFrame(updateNumber);
+}
 // ================================================================
 // 初始化
 // ================================================================
