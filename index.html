@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5人协作 · 待办看板</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ============================================================ -->
+    <!-- 登录弹窗模块（张缙涵 开发）                                    -->
+    <!-- ============================================================ -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeLogin">&times;</span>
+            <h2>团队登录</h2>
+            <input type="text" id="username" placeholder="请输入工号">
+            <input type="password" id="pwd" placeholder="请输入密码（默认: 123456）">
+            <button id="loginBtn">登 录</button>
+            <p id="loginMsg" style="color:red; font-size:13px;"></p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 主应用面板                                                    -->
+    <!-- ============================================================ -->
+    <div id="app">
+        <header>
+            <h1 ondblclick="openLogin()">📋 智能待办看板</h1>
+            <span id="userDisplay">👤 访客</span>
+        </header>
+
+        <!-- ========================================================== -->
+        <!-- 统计卡片模块（熊健 开发）                                    -->
+        <!-- ========================================================== -->
+        <div class="stats-row">
+            <div class="stat-card">📦 总任务 <span id="totalCount">0</span></div>
+            <div class="stat-card">✅ 已完成 <span id="doneCount">0</span></div>
+            <div class="stat-card">⏳ 待处理 <span id="pendingCount">0</span></div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- 筛选功能模块（郭桂林 开发）                                  -->
+        <!-- ========================================================== -->
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">📋 全部</button>
+            <button class="filter-btn" data-filter="active">⏳ 进行中</button>
+            <button class="filter-btn" data-filter="completed">✅ 已完成</button>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- 输入区域                                                    -->
+        <!-- ========================================================== -->
+        <div class="input-area">
+            <input type="text" id="todoInput" placeholder="输入新的待办事项...">
+            <button id="addBtn">➕ 添加</button>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- 待办列表（王历程 开发，采用事件委托优化）                    -->
+        <!-- ========================================================== -->
+        <ul id="todoList"></ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
