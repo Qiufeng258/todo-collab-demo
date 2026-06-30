@@ -95,7 +95,9 @@ function addTodo() {
     render();
 }
 
+// ================================================================
 // 事件委托：统一处理删除 & 切换完成状态（王历程 优化）
+// ================================================================
 todoList.addEventListener('click', function(e) {
     var li = e.target.closest('li');
     if (!li) return;
@@ -103,14 +105,20 @@ todoList.addEventListener('click', function(e) {
     var todo = todos.find(function(t) { return t.id === id; });
     if (!todo) return;
 
-    // 点击删除按钮
+    // ---- 点击删除按钮（王历程 增加二次确认） ----
     if (e.target.classList.contains('del-btn')) {
+        // ============================================================
+        // 王历程 优化：删除前增加二次确认，防止误删
+        // ============================================================
+        if (!confirm('⚠️ 确定要删除这条待办吗？')) {
+            return;  // 用户取消，不执行删除
+        }
         todos = todos.filter(function(t) { return t.id !== id; });
         render();
         return;
     }
 
-    // 切换完成状态
+    // ---- 切换完成状态 ----
     todo.completed = !todo.completed;
     render();
 });
