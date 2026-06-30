@@ -168,6 +168,7 @@ function handleLogin() {
     if (pwd === '123456') {
         currentUser = user;
         userDisplay.textContent = '👋 ' + user;
+        showWelcomeTip(user);  // 张缙涵 添加：登录成功弹出欢迎提示
         loginModal.style.display = 'none';
         loginMsg.textContent = '';
     } else {
@@ -201,3 +202,9 @@ window.openLogin = openLogin;
 // ================================================================
 console.log('✅ 智能待办看板已启动！');
 console.log('👥 小组成员：陈志豪（组长）、张缙涵、王历程、熊健、郭桂林');
+// ================================================================
+// 张缙涵 优化：登录成功后增加欢迎弹窗反馈
+// ================================================================
+function showWelcomeTip(username) {
+    alert('🎉 欢迎回来，' + username + '！');
+}
