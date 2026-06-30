@@ -13,12 +13,14 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
+
 // ================================================================
 // 全局状态
 // ================================================================
-let todos = [];                    // 待办数据存储
-let currentFilter = 'all';         // 当前筛选模式: 'all' | 'active' | 'completed'（郭桂林 开发）
-let currentUser = null;            // 当前登录用户
+let todos = [];
+let currentFilter = 'all';
+let currentUser = null;
+
 
 // ================================================================
 // DOM 引用
@@ -31,11 +33,13 @@ const doneSpan = document.getElementById('doneCount');
 const pendingSpan = document.getElementById('pendingCount');
 const filterBtns = document.querySelectorAll('.filter-btn');
 
+
 // ================================================================
 // 核心渲染函数（王历程 开发）
 // 采用 DocumentFragment 减少回流，优化渲染性能
 // ================================================================
 function render() {
+
     // ---- 1. 更新统计卡片（熊健 开发） ----
     const total = todos.length;
     const done = todos.filter(function(t) { return t.completed; }).length;
@@ -43,6 +47,7 @@ function render() {
     totalSpan.textContent = total;
     doneSpan.textContent = done;
     pendingSpan.textContent = pending;
+
 
     // ---- 2. 筛选数据（郭桂林 开发） ----
     var filteredTodos = todos;
@@ -52,28 +57,53 @@ function render() {
         filteredTodos = todos.filter(function(t) { return t.completed; });
     }
 
+    // ============================================================
+    // 郭桂林 优化：筛选结果为空时显示友好提示
+    // ============================================================
+    var emptyMessage = '';
+    if (filteredTodos.length === 0 && todos.length > 0) {
+        if (currentFilter === 'active') {
+            emptyMessage = '🎯 太棒了！所有待办都已完成！';
+        } else if (currentFilter === 'completed') {
+            emptyMessage = '📝 还没有已完成的待办，加油！';
+        }
+    } else if (filteredTodos.length === 0 && todos.length === 0) {
+        emptyMessage = '📋 暂无待办，添加一条吧！';
+    }
+
+
     // ---- 3. 渲染列表（王历程 开发，使用 DocumentFragment） ----
     var fragment = document.createDocumentFragment();
-    filteredTodos.forEach(function(todo) {
-        var li = document.createElement('li');
-        if (todo.completed) li.classList.add('done');
-        li.dataset.id = todo.id;
 
-        var textSpan = document.createElement('span');
-        textSpan.textContent = escapeHtml(todo.text);  // 防 XSS
+    // 如果有空状态提示，显示提示信息
+    if (emptyMessage) {
+        var emptyLi = document.createElement('li');
+        emptyLi.style.cssText = 'text-align:center; color:#999; font-size:16px; padding:40px 0; border: none; background: none; cursor: default;';
+        emptyLi.textContent = emptyMessage;
+        fragment.appendChild(emptyLi);
+    } else {
+        filteredTodos.forEach(function(todo) {
+            var li = document.createElement('li');
+            if (todo.completed) li.classList.add('done');
+            li.dataset.id = todo.id;
 
-        var delBtn = document.createElement('button');
-        delBtn.textContent = '✕';
-        delBtn.className = 'del-btn';
+            var textSpan = document.createElement('span');
+            textSpan.textContent = escapeHtml(todo.text);
 
-        li.appendChild(textSpan);
-        li.appendChild(delBtn);
-        fragment.appendChild(li);
-    });
+            var delBtn = document.createElement('button');
+            delBtn.textContent = '✕';
+            delBtn.className = 'del-btn';
+
+            li.appendChild(textSpan);
+            li.appendChild(delBtn);
+            fragment.appendChild(li);
+        });
+    }
 
     todoList.innerHTML = '';
     todoList.appendChild(fragment);
 }
+
 
 // ================================================================
 // 待办 CRUD 核心操作（王历程 开发）
@@ -95,7 +125,10 @@ function addTodo() {
     render();
 }
 
+
+// ================================================================
 // 事件委托：统一处理删除 & 切换完成状态（王历程 优化）
+// ================================================================
 todoList.addEventListener('click', function(e) {
     var li = e.target.closest('li');
     if (!li) return;
@@ -103,8 +136,14 @@ todoList.addEventListener('click', function(e) {
     var todo = todos.find(function(t) { return t.id === id; });
     if (!todo) return;
 
-    // 点击删除按钮
+    // 点击删除按钮（王历程 增加二次确认）
     if (e.target.classList.contains('del-btn')) {
+        // ============================================================
+        // 王历程 优化：删除前增加二次确认，防止误删
+        // ============================================================
+        if (!confirm('⚠️ 确定要删除 "' + todo.text + '" 吗？')) {
+            return;
+        }
         todos = todos.filter(function(t) { return t.id !== id; });
         render();
         return;
@@ -115,25 +154,26 @@ todoList.addEventListener('click', function(e) {
     render();
 });
 
+
 // 绑定添加事件
 addBtn.addEventListener('click', addTodo);
 todoInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') addTodo();
 });
 
+
 // ================================================================
 // 筛选功能（郭桂林 开发）
 // ================================================================
 filterBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
-        // 切换激活态
         filterBtns.forEach(function(b) { b.classList.remove('active'); });
         this.classList.add('active');
-        // 更新筛选模式并重新渲染
         currentFilter = this.dataset.filter;
         render();
     });
 });
+
 
 // ================================================================
 // 登录功能（张缙涵 开发）
@@ -147,7 +187,6 @@ var pwdInput = document.getElementById('pwd');
 var loginMsg = document.getElementById('loginMsg');
 var userDisplay = document.getElementById('userDisplay');
 
-// 打开登录弹窗
 function openLogin() {
     loginModal.style.display = 'block';
     loginMsg.textContent = '';
@@ -155,7 +194,6 @@ function openLogin() {
     pwdInput.value = '';
 }
 
-// 处理登录
 function handleLogin() {
     var user = escapeHtml(usernameInput.value.trim());
     var pwd = escapeHtml(pwdInput.value.trim());
@@ -168,6 +206,10 @@ function handleLogin() {
     if (pwd === '123456') {
         currentUser = user;
         userDisplay.textContent = '👋 ' + user;
+        // ============================================================
+        // 张缙涵 优化：登录成功后增加欢迎弹窗
+        // ============================================================
+        alert('🎉 欢迎回来，' + user + '！');
         loginModal.style.display = 'none';
         loginMsg.textContent = '';
     } else {
@@ -175,29 +217,23 @@ function handleLogin() {
     }
 }
 
-// 关闭弹窗
 closeLogin.addEventListener('click', function() {
     loginModal.style.display = 'none';
 });
 
-// 登录按钮
 loginBtn.addEventListener('click', handleLogin);
 
-// 回车登录
 pwdInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleLogin();
 });
+
 
 // ================================================================
 // 初始化
 // ================================================================
 render();
 
-// 暴露给 HTML 中 ondblclick 使用
 window.openLogin = openLogin;
 
-// ================================================================
-// 导出（方便调试，非必须）
-// ================================================================
 console.log('✅ 智能待办看板已启动！');
 console.log('👥 小组成员：陈志豪（组长）、张缙涵、王历程、熊健、郭桂林');
