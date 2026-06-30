@@ -201,3 +201,36 @@ window.openLogin = openLogin;
 // ================================================================
 console.log('✅ 智能待办看板已启动！');
 console.log('👥 小组成员：陈志豪（组长）、张缙涵、王历程、熊健、郭桂林');
+// ================================================================
+// 刘兴鎧 开发：一键清空所有待办（带二次确认）
+// ================================================================
+
+// 清空所有待办
+function clearAllTodos() {
+    if (todos.length === 0) {
+        alert('📋 待办列表已经是空的！');
+        return;
+    }
+
+    var confirmMsg = '⚠️ 确定要清空所有待办吗？\n\n当前共有 ' + todos.length + ' 条待办，此操作不可撤销！';
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    todos = [];
+    render();
+    alert('✅ 已清空所有待办！');
+}
+
+// 添加清空按钮
+var clearBtn = document.createElement('button');
+clearBtn.textContent = '🗑️ 清空全部';
+clearBtn.id = 'clearBtn';
+clearBtn.style.cssText = 'padding: 14px 20px; background: #ff4d4f; color: white; border: none; border-radius: 16px; font-weight: 600; cursor: pointer; margin-left: 8px;';
+
+var inputArea = document.querySelector('.input-area');
+if (inputArea) {
+    inputArea.appendChild(clearBtn);
+}
+
+clearBtn.addEventListener('click', clearAllTodos);
